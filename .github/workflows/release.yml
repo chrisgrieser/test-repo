@@ -22,13 +22,14 @@ jobs:
           count_tags="$(git tag | wc -l)"
           if [[ $count_tags -ge 2 ]]; then # requires 2 tags
             previous_tag="$(git describe --abbrev=0 --tags "$(git describe --tags --abbrev=0)"^)" 
-            prev_commit_messages="$(git log "${previous_tag}"..HEAD --pretty='format:- %s.')"
+            ref="$previous_tag"
           else
             root_commit="$(git rev-list --max-parents=0 HEAD)"
-            prev_commit_messages="$(git log "${root_commit}"..HEAD --pretty='format:- %s.')"
+            ref="$root_commit"
           fi
-          echo "$prev_commit_messages"
+          prev_commit_messages="$(git log "${ref}"..HEAD --pretty='format:- %s.')"
           echo "# Changelog" > CHANGELOG.txt
+          echo "## ref: $ref" >> CHANGELOG.txt
           echo "$prev_commit_messages" >> CHANGELOG.txt
 
       - name: Build .alfredworkflow
