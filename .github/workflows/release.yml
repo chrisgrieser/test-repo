@@ -31,8 +31,8 @@ jobs:
           echo "$prev_commit_messages"
           echo "# Changelog" > CHANGELOG.txt
           echo "## ref: $ref" >> CHANGELOG.txt
-          echo "git tags: $(git tag --list)"
-          echo "git log: $(git log --pretty=oneline)"
+          echo "git tags: $(git tag --list)" >> CHANGELOG.txt
+          echo "git log: $(git log --pretty=oneline)" >> CHANGELOG.txt
           echo "$prev_commit_messages" >> CHANGELOG.txt
 
       - name: Build .alfredworkflow
