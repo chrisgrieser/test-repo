@@ -3,6 +3,11 @@ name: Alfred Workflow Release Action
 on:
   push: { tags: ["*"] }
 
+env:
+  WORKFLOW_NAME: ${{ github.event.repository.name }}
+  VERSION: ${{ github.ref }} # = the tag used to trigger this action
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 #───────────────────────────────────────────────────────────────────────────────
 
 jobs:
@@ -14,9 +19,11 @@ jobs:
 
         #───────────────────────────────────────────────────────────────────────
 
-      - name: Build
+      - name: Build .alfredworkflow
         run: |
-          touch dummy.zip
+          zip --quiet --recurse-paths "${{ env.WORKFLOW_NAME }}.alfredworkflow" . \
+            --exclude ".git*" "Makefile" ".build-and-release.sh" "README.md" "assets/*" \
+            ".DS_Store" ".rsync-exclude"
 
       - name: Create Changelog
         run: |
@@ -36,8 +43,8 @@ jobs:
           body_path: ${{ github.workspace }}-CHANGELOG.txt
           # note you'll typically need to create a personal access token
           # with permissions to create releases in the other repo
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
 
           # one per line
           files: |
-            dummy.zip
+            ${{ env.WORKFLOW_NAME }}.alfredworkflow

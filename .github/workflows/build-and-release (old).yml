@@ -1,6 +1,6 @@
 name: Build & Release Alfred Workflow
 
-on: # yamllint disable-line rule:truthy
+on:
   push:
     tags:
       - "*"
