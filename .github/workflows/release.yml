@@ -17,8 +17,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-        #───────────────────────────────────────────────────────────────────────
-
       - name: Build .alfredworkflow
         run: |
           zip --quiet --recurse-paths "${{ env.WORKFLOW_NAME }}.alfredworkflow" . \
@@ -27,24 +25,22 @@ jobs:
 
       - name: Create Changelog
         run: |
-          # if git describe --tags &>/dev/null; then        # If tags exist
-          #   ref_commit="$(git describe --tags --abbrev=0)" # Previous tag
-          # else
-          #   ref_commit="$(git rev-list --max-parents=0 HEAD)" # Root commit
-          # fi
-          # prev_commit_messages="$(git log "${ref_commit}"..HEAD --pretty='format:* %s.')"
-          # echo "$prev_commit_messages"
-          echo "# Good things have arrived" > ${{ github.workspace }}-CHANGELOG.txt
+          count_tags="$(git tag | wc -l)"
+          if [[ $count_tags -ge 2 ]]; then # requires 2 tags
+            previous_tag="$(git describe --abbrev=0 --tags "$(git describe --tags --abbrev=0)"^)" 
+            ref="${previous_tag}..HEAD^"
+          else
+            root_commit="$(git rev-list --max-parents=0 HEAD)"
+            ref="${root_commit}..HEAD^"
+          fi
+          prev_commit_messages="$(git log $ref --pretty='format:- %s.')"
+          echo "# Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "$prev_commit_messages" >> ${{ github.workspace }}-CHANGELOG.txt
 
       # DOCS https://github.com/softprops/action-gh-release?tab=readme-ov-file#%EF%B8%8F-uploading-release-assets
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
-          # note you'll typically need to create a personal access token
-          # with permissions to create releases in the other repo
           token: ${{ env.GITHUB_TOKEN }}
-
-          # one per line
-          files: |
-            ${{ env.WORKFLOW_NAME }}.alfredworkflow
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          files: ${{ env.WORKFLOW_NAME }}.alfredworkflow
