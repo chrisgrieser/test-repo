@@ -1,0 +1,43 @@
+name: Alfred Workflow Release Action
+
+on:
+  push: { tags: ["*"] }
+
+#───────────────────────────────────────────────────────────────────────────────
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+        #───────────────────────────────────────────────────────────────────────
+
+      - name: Build
+        run: |
+          touch dummy.zip
+
+      - name: Create Changelog
+        run: |
+          # if git describe --tags &>/dev/null; then        # If tags exist
+          #   ref_commit="$(git describe --tags --abbrev=0)" # Previous tag
+          # else
+          #   ref_commit="$(git rev-list --max-parents=0 HEAD)" # Root commit
+          # fi
+          # prev_commit_messages="$(git log "${ref_commit}"..HEAD --pretty='format:* %s.')"
+          # echo "$prev_commit_messages"
+          echo "# Good things have arrived" > ${{ github.workspace }}-CHANGELOG.txt
+
+      # DOCS https://github.com/softprops/action-gh-release?tab=readme-ov-file#%EF%B8%8F-uploading-release-assets
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          # note you'll typically need to create a personal access token
+          # with permissions to create releases in the other repo
+          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+
+          # one per line
+          files: |
+            dummy.zip
