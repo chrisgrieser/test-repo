@@ -28,19 +28,19 @@ jobs:
           count_tags="$(git tag | wc -l)"
           if [[ $count_tags -ge 2 ]]; then # requires 2 tags
             previous_tag="$(git describe --abbrev=0 --tags "$(git describe --tags --abbrev=0)"^)" 
-            ref="${previous_tag}..HEAD^"
+            prev_commit_messages="$(git log "${previous_tag}"..HEAD^ --pretty='format:- %s.')"
           else
             root_commit="$(git rev-list --max-parents=0 HEAD)"
-            ref="${root_commit}..HEAD^"
+            prev_commit_messages="$(git log "${root_commit}"..HEAD^ --pretty='format:- %s.')"
           fi
-          prev_commit_messages="$(git log $ref --pretty='format:- %s.')"
-          echo "# Changelog" >> ${{ github.workspace }}-CHANGELOG.txt
-          echo "$prev_commit_messages" >> ${{ github.workspace }}-CHANGELOG.txt
+          echo "$prev_commit_messages"
+          echo "# Changelog" > CHANGELOG.txt
+          echo "$prev_commit_messages" >> CHANGELOG.txt
 
       # DOCS https://github.com/softprops/action-gh-release?tab=readme-ov-file#%EF%B8%8F-uploading-release-assets
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
           token: ${{ env.GITHUB_TOKEN }}
-          body_path: ${{ github.workspace }}-CHANGELOG.txt
+          body_path: CHANGELOG.txt
           files: ${{ env.WORKFLOW_NAME }}.alfredworkflow
