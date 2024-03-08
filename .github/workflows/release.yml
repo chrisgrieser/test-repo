@@ -16,12 +16,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # by default, no tags and only a single commit is fetched. To use git
+          # history in the next step, we need to fetch all history.
+          fetch-depth: 0 # 0 = all history
+          fetch-tags: true
 
       - name: Create Changelog
         run: |
           count_tags="$(git tag | wc -l)"
           if [[ $count_tags -ge 2 ]]; then # requires 2 tags
-            previous_tag="$(git tag --sort=-creatordate | head -3 | tail -1)" 
+            previous_tag="$(git tag --sort=-creatordate | head -2 | tail -1)" 
             ref="$previous_tag"
           else
             root_commit="$(git rev-list --max-parents=0 HEAD)"
