@@ -1,11 +1,11 @@
 name: Alfred Workflow Release Action
 
 on:
-  push: { tags: ["*"] }
+  push:
+    tags: ["*"]
 
 env:
   WORKFLOW_NAME: ${{ github.event.repository.name }}
-  VERSION: ${{ github.ref }} # = the tag used to trigger this action
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 #───────────────────────────────────────────────────────────────────────────────
@@ -17,25 +17,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build .alfredworkflow
-        run: |
-          zip --quiet --recurse-paths "${{ env.WORKFLOW_NAME }}.alfredworkflow" . \
-            --exclude ".git*" "Makefile" ".build-and-release.sh" "README.md" "assets/*" \
-            ".DS_Store" ".rsync-exclude"
-
       - name: Create Changelog
         run: |
           count_tags="$(git tag | wc -l)"
           if [[ $count_tags -ge 2 ]]; then # requires 2 tags
             previous_tag="$(git describe --abbrev=0 --tags "$(git describe --tags --abbrev=0)"^)" 
-            prev_commit_messages="$(git log "${previous_tag}"..HEAD^ --pretty='format:- %s.')"
+            prev_commit_messages="$(git log "${previous_tag}"..HEAD --pretty='format:- %s.')"
           else
             root_commit="$(git rev-list --max-parents=0 HEAD)"
-            prev_commit_messages="$(git log "${root_commit}"..HEAD^ --pretty='format:- %s.')"
+            prev_commit_messages="$(git log "${root_commit}"..HEAD --pretty='format:- %s.')"
           fi
           echo "$prev_commit_messages"
           echo "# Changelog" > CHANGELOG.txt
           echo "$prev_commit_messages" >> CHANGELOG.txt
+
+      - name: Build .alfredworkflow
+        run: |
+          zip --quiet --recurse-paths "${{ env.WORKFLOW_NAME }}.alfredworkflow" . \
+            --exclude ".git*" "Makefile" ".build-and-release.sh" "README.md" "assets/*" \
+            ".DS_Store" ".rsync-exclude"
 
       # DOCS https://github.com/softprops/action-gh-release?tab=readme-ov-file#%EF%B8%8F-uploading-release-assets
       - name: Release
