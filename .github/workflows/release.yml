@@ -8,6 +8,9 @@ env:
   WORKFLOW_NAME: ${{ github.event.repository.name }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+permissions:
+  contents: write
+
 #───────────────────────────────────────────────────────────────────────────────
 
 jobs:
@@ -41,7 +44,7 @@ jobs:
         run: |
           zip --quiet --recurse-paths "${{ env.WORKFLOW_NAME }}.alfredworkflow" . \
             --exclude ".git*" "Makefile" ".build-and-release.sh" "README.md" \
-            "assets/*" ".DS_Store" ".rsync-exclude"
+            "assets/*" ".rsync-exclude"
 
       # DOCS https://github.com/softprops/action-gh-release?tab=readme-ov-file#%EF%B8%8F-uploading-release-assets
       - name: Release
