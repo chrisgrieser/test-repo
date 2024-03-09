@@ -35,9 +35,9 @@ jobs:
             root_commit=$(git rev-list --max-parents=0 HEAD)
             ref="$root_commit"
           fi
-          prev_commit_messages=$(git log "${ref}"..HEAD --format='- %s' |
+          prev_commit_messages=$(git log "$ref"..HEAD --format='- %s' |
             sed -E "s/([a-z]+): /**\1**: /")
-          echo "## Changelog" > CHANGELOG.txt
+          echo "### Changelog" > CHANGELOG.txt
           echo "$prev_commit_messages" >> CHANGELOG.txt
 
       - name: Build .alfredworkflow
